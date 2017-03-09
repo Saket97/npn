@@ -22,8 +22,15 @@ def transformFunctionInverse(x,y):
 
 a_m = []
 a_s = []
-o_m = []
-o_s = []
+a_c = []
+a_d = []
+o_c = []
+o_d = []
+W_m = []
+b_m = []
+
+W_m.append(  tf.Variable(tf.random_normal([800,1],mean= 0, stddev=1)))
+o_s.append(  tf.Variable(tf.random_normal([800,1],mean= 0, stddev=1)))
 
 #Parameters
 a_c.append( tf.placeholder(tf.float32, shape= (784,None)))
@@ -40,14 +47,16 @@ for l in range(1,L):
     a_s.append(  tf.Variable(tf.random_normal([800,1],mean= 0, stddev=1)))
     o_m.append(  tf.Variable(tf.random_normal([800,1],mean= 0, stddev=1)))
     o_s.append(  tf.Variable(tf.random_normal([800,1],mean= 0, stddev=1)))
+    W_m.append(  tf.Variable(tf.random_normal([800,1],mean= 0, stddev=1)))
+    o_s.append(  tf.Variable(tf.random_normal([800,1],mean= 0, stddev=1)))
 
     #Equation 1
     a_m[l-1],a_s[l-1] = transformFunction( a_c[l-1], a_d[l-1]) 
-    o_m[l] =  tf.matmul(a_m[l-1],W_m[l-1]) + b_m[l] 
+    o_m[l] =  tf.matmul(a_m[l-1],W_m[l]) + b_m[l] 
 
     #Equation 2
     term_1 = tf.matmul(a_s[l-1],W_s[l])
-    term_2 = tf.matmul(a_s[l-1], tf.mul( W_m[l-1], W_m[l-1] ) ) 
+    term_2 = tf.matmul(a_s[l-1], tf.mul( W_m[l], W_m[l] ) ) 
     term_3 = tf.matmul(tf.multiply( a_m[l-1], a_m[l-1]),W_s[l])
     o_s[l] =  term1 + term_2+ term_3 + b_s[l]
 
