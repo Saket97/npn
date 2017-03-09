@@ -11,14 +11,23 @@ from tensorflow.examples.tutorials.mnist import input_data
 
 mnist = input_data.read_data_sets("data/", one_hot=True)
 
+
+def transformFunction(x,y):
+
+    return x,y
+
+def transformFunctionInverse(x,y):
+
+    return x,y
+
 a_m = []
 a_s = []
 o_m = []
 o_s = []
 
 #Parameters
-a_m.append( tf.placeholder(tf.float32, shape= (784,784)))
-a_s.append( tf.placeholder(tf.float32, shape= (784,784)))
+a_c.append( tf.placeholder(tf.float32, shape= (784,None)))
+a_d.append( tf.placeholder(tf.float32, shape= (784,None)))
 
 #L is the number of Hidden Layers here
 L =2
@@ -33,7 +42,7 @@ for l in range(1,L):
     o_s.append(  tf.Variable(tf.random_normal([800,1],mean= 0, stddev=1)))
 
     #Equation 1
-    a_m[l-1],a_s[l-1] = transformFunction( a_c[l-1], a_m[l-1]) 
+    a_m[l-1],a_s[l-1] = transformFunction( a_c[l-1], a_d[l-1]) 
     o_m[l] =  tf.matmul(a_m[l-1],W_m[l-1]) + b_m[l] 
 
     #Equation 2
