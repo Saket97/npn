@@ -1,4 +1,5 @@
 from math import pi
+import tensorflow as tf
 
 c_square = tf.constant(pi)
 Alpha = tf.constant(8-4*tf.sqrt(2))
@@ -50,4 +51,17 @@ for l in range(1,L):
 
     a_s[l] = 4*a_s_sigm_term - tf.square(a_m[l]) -2*a_m[l]-1
 
+#Equation 1
+a_m[L-1],a_s[L-1] = transformFunction( a_c[L-1], a_m[L-1]) 
+o_m[L] =  tf.matmul(a_m[L-1],W_m[L-1]) + b_m[L] 
 
+#Equation 2
+term_1 = tf.matmul(a_s[L-1],W_s[L])
+term_2 = tf.matmul(a_s[L-1], tf.mul( W_m[L-1], W_m[L-1] ) ) 
+term_3 = tf.matmul(tf.multiply( a_m[L-1], a_m[L-1]),W_s[L])
+o_s[L] =  term1 + term_2+ term_3 + b_s[L]
+
+#Equation 3
+o_c[L],o_d[L] = transformFunctionInverse(o_m[L],o_s[L])
+
+loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=
