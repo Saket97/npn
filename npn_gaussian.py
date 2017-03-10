@@ -45,22 +45,28 @@ def declareVariables():
     W_s.append("dummy")
     a_c.append("dummy")
     a_d.append("dummy")
+    b_m.append("dummy")
+    b_s.append("dummy")
     #Parameters
+
     a_m.append( tf.placeholder(tf.float32, shape= (dim_inputs,None)))
     a_s.append( tf.placeholder(tf.float32, shape= (dim_inputs,None)))
 
-    W_m.append(tf.Variable( tf.random_normal([num_hidden_units,dim_inputs], mean = 0 ,stddev =1 )))
-    W_s.append(tf.Variable( tf.random_normal([num_hidden_units,dim_inputs], mean = 0 ,stddev =1 )))
+    W_m.append(tf.Variable( tf.random_normal([num_hidden_units,1], mean = 0 ,stddev =1 )))
+    W_s.append(tf.Variable( tf.random_normal([num_hidden_units,1], mean = 0 ,stddev =1 )))
+    b_m.append(tf.Variable( tf.random_normal([num_hidden_units,1], mean = 0 ,stddev =1 )))
+    b_s.append(tf.Variable( tf.random_normal([num_hidden_units,1], mean = 0 ,stddev =1 )))
     o_s.append(tf.Variable( tf.random_normal([num_hidden_units,1], mean = 0 ,stddev =1 )))
     o_m.append(tf.Variable( tf.random_normal([num_hidden_units,1], mean = 0 ,stddev =1 )))
     o_c.append(tf.Variable( tf.random_normal([num_hidden_units,1], mean = 0 ,stddev =1 )))
     o_d.append(tf.Variable( tf.random_normal([num_hidden_units,1], mean = 0 ,stddev =1 )))
-    b_m.append(tf.Variable( tf.random_normal([num_hidden_units,1], mean = 0 ,stddev =1 )))
 
-    for i in range(1,L):
+    for i in range(1,L+1):
 
         W_m.append(tf.Variable( tf.random_normal([num_hidden_units,num_hidden_units], mean = 0 ,stddev =1 )))
         W_s.append(tf.Variable( tf.random_normal([num_hidden_units,num_hidden_units], mean = 0 ,stddev =1 )))
+        b_s.append(tf.Variable( tf.random_normal([num_hidden_units,1], mean = 0 ,stddev =1 )))
+        b_m.append(tf.Variable( tf.random_normal([num_hidden_units,1], mean = 0 ,stddev =1 )))
         o_s.append(tf.Variable( tf.random_normal([num_hidden_units,1], mean = 0 ,stddev =1 )))
         o_m.append(tf.Variable( tf.random_normal([num_hidden_units,1], mean = 0 ,stddev =1 )))
         o_c.append(tf.Variable( tf.random_normal([num_hidden_units,1], mean = 0 ,stddev =1 )))
@@ -78,6 +84,8 @@ def declareVariables():
 #L is the number of Hidden Layers here
 L =2
 batch_size = 32
+
+declareVariables()
 
 for l in range(1,L+1):
 
