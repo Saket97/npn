@@ -73,9 +73,10 @@ for l in range(1,L):
     a_s_sigm_term = Alpha*(o_c[l]+Beta)/tf.sqrt(1+c_square*tf.square(Alpha)*o_d[l])
 
     a_s[l] = 4*a_s_sigm_term - tf.square(a_m[l]) -2*a_m[l]-1
+    a_c[l], a_d[l] = transformFunctionInverse(a_m[l], a_s[l])
 
 #Equation 1
-a_m[L-1],a_s[L-1] = transformFunction( a_c[L-1], a_m[L-1]) 
+a_m[L-1],a_s[L-1] = transformFunction( a_c[L-1], a_d[L-1]) 
 o_m[L] =  tf.matmul(a_m[L-1],W_m[L-1]) + b_m[L] 
 
 #Equation 2
