@@ -28,8 +28,10 @@ o_c = []
 o_d = []
 W_m = []
 b_m = []
+w_s = []
 
-W_m.append(  tf.Variable(tf.random_normal([800,1],mean= 0, stddev=1)))
+W_m.append(  tf.Variable(tf.random_normal([800,784],mean= 0, stddev=1)))
+w_s.append( tf.Variable(tf.random_normal([800,784], mean=0, stddev=1)))
 o_s.append(  tf.Variable(tf.random_normal([800,1],mean= 0, stddev=1)))
 
 #Parameters
@@ -40,24 +42,25 @@ a_d.append( tf.placeholder(tf.float32, shape= (784,None)))
 L =2
 batch_size = 32
 
-for l in range(1,L):
+for l in range(1,L+1):
 
     #declaring the tensorflow variables
     a_m.append(  tf.Variable(tf.random_normal([800,1],mean= 0, stddev=1)))
     a_s.append(  tf.Variable(tf.random_normal([800,1],mean= 0, stddev=1)))
     o_m.append(  tf.Variable(tf.random_normal([800,1],mean= 0, stddev=1)))
     o_s.append(  tf.Variable(tf.random_normal([800,1],mean= 0, stddev=1)))
-    W_m.append(  tf.Variable(tf.random_normal([800,1],mean= 0, stddev=1)))
+    W_m.append(  tf.Variable(tf.random_normal([800,784],mean= 0, stddev=1)))
+    w_s.append( tf.Variable(tf.random_normal([800,784],mean=0, stddev=1)))
     o_s.append(  tf.Variable(tf.random_normal([800,1],mean= 0, stddev=1)))
 
     #Equation 1
     a_m[l-1],a_s[l-1] = transformFunction( a_c[l-1], a_d[l-1]) 
-    o_m[l] =  tf.matmul(a_m[l-1],W_m[l]) + b_m[l] 
+    o_m[l] =  tf.matmul(W_m[l], a_m[l-1]) + b_m[l] 
 
     #Equation 2
-    term_1 = tf.matmul(a_s[l-1],W_s[l])
-    term_2 = tf.matmul(a_s[l-1], tf.mul( W_m[l], W_m[l] ) ) 
-    term_3 = tf.matmul(tf.multiply( a_m[l-1], a_m[l-1]),W_s[l])
+    term_1 = tf.matmul(W_s[l], a_s[l-1])
+    term_2 = tf.matmul( tf.mul( W_m[l], W_m[l] ), a_s[l-1] ) 
+    term_3 = tf.matmul(W_s[l-1], tf.multiply( a_m[l-1], a_m[l-1]))
     o_s[l] =  term1 + term_2+ term_3 + b_s[l]
 
     #Equation 3
@@ -75,14 +78,18 @@ for l in range(1,L):
     a_s[l] = 4*a_s_sigm_term - tf.square(a_m[l]) -2*a_m[l]-1
     a_c[l], a_d[l] = transformFunctionInverse(a_m[l], a_s[l])
 
+# Adjusting the last layer W_m and W_s
+W_m[L] = tf.Variable( tf.random_normal([10,800],mean = 0, stddev=1))
+w_s[L] = tf.Variable( tf.random_normal([10,800], mean=0, stddev=1))
+
 #Equation 1
 a_m[L-1],a_s[L-1] = transformFunction( a_c[L-1], a_d[L-1]) 
 o_m[L] =  tf.matmul(a_m[L-1],W_m[L-1]) + b_m[L] 
 
 #Equation 2
-term_1 = tf.matmul(a_s[L-1],W_s[L])
-term_2 = tf.matmul(a_s[L-1], tf.mul( W_m[L-1], W_m[L-1] ) ) 
-term_3 = tf.matmul(tf.multiply( a_m[L-1], a_m[L-1]),W_s[L])
+term_1 = tf.matmul(W_s[L],a_s[L-1])
+term_2 = tf.matmul( tf.mul( W_m[L-1], W_m[L-1] ), a_s[L-1] ) 
+term_3 = tf.matmul(w_s[L],tf.multiply( a_m[L-1], a_m[L-1]))
 o_s[L] =  term1 + term_2+ term_3 + b_s[L]
 
 o_d_term = tf.multiply(c_square, o_d[l])
