@@ -6,8 +6,8 @@ import tensorflow as tf
 c_square = tf.constant(pi)
 Alpha = tf.constant(8-4*math.sqrt(2.0))
 Beta = tf.constant(-0.5*math.log(math.sqrt(2.0)+1))
-num_hidden_units = 800
-dim_inputs = 784
+num_hidden_units = num_hidden_units
+dim_inputs = dim_inputs
 # Import MNIST data
 from tensorflow.examples.tutorials.mnist import input_data
 
@@ -31,18 +31,33 @@ def declareVariables():
     o_c.append("dummy") # Dummy Variable to eep equations consistent
     W_m.append("dummy")
     W_s.append("dummy")
+    a_c.append("dummy")
+    a_d.append("dummy")
     #Parameters
     a_m.append( tf.placeholder(tf.float32, shape= (dim_inputs,None)))
     a_s.append( tf.placeholder(tf.float32, shape= (dim_inputs,None)))
 
-    W_m.append(tf.Variable( tf.random_normal([800,784], mean = 0 ,stddev =1 )))
-    W_s.append(tf.Variable( tf.random_normal([800,784], mean = 0 ,stddev =1 )))
-    o_s.append(tf.Variable( tf.random_normal([800,1], mean = 0 ,stddev =1 )))
-    o_m.append(tf.Variable( tf.random_normal([800,1], mean = 0 ,stddev =1 )))
-    o_c.append(tf.Variable( tf.random_normal([800,1], mean = 0 ,stddev =1 )))
-    o_d.append(tf.Variable( tf.random_normal([800,1], mean = 0 ,stddev =1 )))
+    W_m.append(tf.Variable( tf.random_normal([num_hidden_units,dim_inputs], mean = 0 ,stddev =1 )))
+    W_s.append(tf.Variable( tf.random_normal([num_hidden_units,dim_inputs], mean = 0 ,stddev =1 )))
+    o_s.append(tf.Variable( tf.random_normal([num_hidden_units,1], mean = 0 ,stddev =1 )))
+    o_m.append(tf.Variable( tf.random_normal([num_hidden_units,1], mean = 0 ,stddev =1 )))
+    o_c.append(tf.Variable( tf.random_normal([num_hidden_units,1], mean = 0 ,stddev =1 )))
+    o_d.append(tf.Variable( tf.random_normal([num_hidden_units,1], mean = 0 ,stddev =1 )))
+    b_m.append(tf.Variable( tf.random_normal([num_hidden_units,1], mean = 0 ,stddev =1 )))
 
     for i range(1,L):
+
+        W_m.append(tf.Variable( tf.random_normal([num_hidden_units,num_hidden_units], mean = 0 ,stddev =1 )))
+        W_s.append(tf.Variable( tf.random_normal([num_hidden_units,num_hidden_units], mean = 0 ,stddev =1 )))
+        o_s.append(tf.Variable( tf.random_normal([num_hidden_units,1], mean = 0 ,stddev =1 )))
+        o_m.append(tf.Variable( tf.random_normal([num_hidden_units,1], mean = 0 ,stddev =1 )))
+        o_c.append(tf.Variable( tf.random_normal([num_hidden_units,1], mean = 0 ,stddev =1 )))
+        o_d.append(tf.Variable( tf.random_normal([num_hidden_units,1], mean = 0 ,stddev =1 )))
+        a_m.append( tf.placeholder(tf.float32, shape= (dim_inputs,None)))
+        a_s.append( tf.placeholder(tf.float32, shape= (dim_inputs,None)))
+        a_c.append( tf.placeholder(tf.float32, shape= (dim_inputs,None)))
+        a_d.append( tf.placeholder(tf.float32, shape= (dim_inputs,None)))
+
 
 
     
