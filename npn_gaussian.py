@@ -32,8 +32,8 @@ def declareVariables():
     W_m.append("dummy")
     W_s.append("dummy")
     #Parameters
-    a_c.append( tf.placeholder(tf.float32, shape= (dim_inputs,None)))
-    a_d.append( tf.placeholder(tf.float32, shape= (dim_inputs,None)))
+    a_m.append( tf.placeholder(tf.float32, shape= (dim_inputs,None)))
+    a_s.append( tf.placeholder(tf.float32, shape= (dim_inputs,None)))
 
     W_m.append(tf.Variable( tf.random_normal([800,784], mean = 0 ,stddev =1 )))
     W_s.append(tf.Variable( tf.random_normal([800,784], mean = 0 ,stddev =1 )))
@@ -41,6 +41,10 @@ def declareVariables():
     o_m.append(tf.Variable( tf.random_normal([800,1], mean = 0 ,stddev =1 )))
     o_c.append(tf.Variable( tf.random_normal([800,1], mean = 0 ,stddev =1 )))
     o_d.append(tf.Variable( tf.random_normal([800,1], mean = 0 ,stddev =1 )))
+
+    for i range(1,L):
+
+
     
 a_m = []
 a_s = []
@@ -62,7 +66,6 @@ for l in range(1,L+1):
     #declaring the tensorflow variables
 
     #Equation 1
-    a_m[l-1],a_s[l-1] = transformFunction( a_c[l-1], a_d[l-1]) 
     o_m[l] =  tf.matmul(W_m[l], a_m[l-1]) + b_m[l] 
 
     #Equation 2
