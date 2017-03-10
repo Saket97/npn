@@ -6,13 +6,25 @@ import tensorflow as tf
 c_square = tf.constant(pi)
 Alpha = tf.constant(8-4*math.sqrt(2.0))
 Beta = tf.constant(-0.5*math.log(math.sqrt(2.0)+1))
-num_hidden_units = num_hidden_units
-dim_inputs = dim_inputs
+num_hidden_units = 800
+dim_inputs = 784
 # Import MNIST data
 from tensorflow.examples.tutorials.mnist import input_data
 
 mnist = input_data.read_data_sets("data/", one_hot=True)
 
+a_m = []
+a_s = []
+a_c = []
+a_d = []
+o_c = []
+o_d = []
+o_m = []
+o_s = []
+W_m = []
+W_s = []
+b_m = []
+b_s = []
 
 def transformFunction(x,y):
 
@@ -45,7 +57,7 @@ def declareVariables():
     o_d.append(tf.Variable( tf.random_normal([num_hidden_units,1], mean = 0 ,stddev =1 )))
     b_m.append(tf.Variable( tf.random_normal([num_hidden_units,1], mean = 0 ,stddev =1 )))
 
-    for i range(1,L):
+    for i in range(1,L):
 
         W_m.append(tf.Variable( tf.random_normal([num_hidden_units,num_hidden_units], mean = 0 ,stddev =1 )))
         W_s.append(tf.Variable( tf.random_normal([num_hidden_units,num_hidden_units], mean = 0 ,stddev =1 )))
@@ -53,23 +65,14 @@ def declareVariables():
         o_m.append(tf.Variable( tf.random_normal([num_hidden_units,1], mean = 0 ,stddev =1 )))
         o_c.append(tf.Variable( tf.random_normal([num_hidden_units,1], mean = 0 ,stddev =1 )))
         o_d.append(tf.Variable( tf.random_normal([num_hidden_units,1], mean = 0 ,stddev =1 )))
-        a_m.append( tf.placeholder(tf.float32, shape= (dim_inputs,None)))
-        a_s.append( tf.placeholder(tf.float32, shape= (dim_inputs,None)))
-        a_c.append( tf.placeholder(tf.float32, shape= (dim_inputs,None)))
-        a_d.append( tf.placeholder(tf.float32, shape= (dim_inputs,None)))
+        a_m.append( tf.placeholder(tf.float32, shape= (num_hidden_units,None)))
+        a_s.append( tf.placeholder(tf.float32, shape= (num_hidden_units,None)))
+        a_c.append( tf.placeholder(tf.float32, shape= (num_hidden_units,None)))
+        a_d.append( tf.placeholder(tf.float32, shape= (num_hidden_units,None)))
 
 
 
     
-a_m = []
-a_s = []
-a_c = []
-a_d = []
-o_c = []
-o_d = []
-W_m = []
-b_m = []
-W_s = []
 
 
 #L is the number of Hidden Layers here
