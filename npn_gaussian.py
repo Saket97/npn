@@ -6,6 +6,8 @@ import tensorflow as tf
 c_square = tf.constant(pi)
 Alpha = tf.constant(8-4*math.sqrt(2.0))
 Beta = tf.constant(-0.5*math.log(math.sqrt(2.0)+1))
+num_hidden_units = 800
+dim_inputs = 784
 # Import MNIST data
 from tensorflow.examples.tutorials.mnist import input_data
 
@@ -20,6 +22,26 @@ def transformFunctionInverse(x,y):
 
     return x,y
 
+def declareVariables():
+
+    #For First Layer
+    o_m.append("dummy")
+    o_d.append("dummy")
+    o_s.append("dummy") #Dummy Variables to keep equations consistent 
+    o_c.append("dummy") # Dummy Variable to eep equations consistent
+    W_m.append("dummy")
+    W_s.append("dummy")
+    #Parameters
+    a_c.append( tf.placeholder(tf.float32, shape= (dim_inputs,None)))
+    a_d.append( tf.placeholder(tf.float32, shape= (dim_inputs,None)))
+
+    W_m.append(tf.Variable( tf.random_normal([800,784], mean = 0 ,stddev =1 )))
+    W_s.append(tf.Variable( tf.random_normal([800,784], mean = 0 ,stddev =1 )))
+    o_s.append(tf.Variable( tf.random_normal([800,1], mean = 0 ,stddev =1 )))
+    o_m.append(tf.Variable( tf.random_normal([800,1], mean = 0 ,stddev =1 )))
+    o_c.append(tf.Variable( tf.random_normal([800,1], mean = 0 ,stddev =1 )))
+    o_d.append(tf.Variable( tf.random_normal([800,1], mean = 0 ,stddev =1 )))
+    
 a_m = []
 a_s = []
 a_c = []
@@ -28,15 +50,8 @@ o_c = []
 o_d = []
 W_m = []
 b_m = []
-w_s = []
+W_s = []
 
-W_m.append(  tf.Variable(tf.random_normal([800,784],mean= 0, stddev=1)))
-w_s.append( tf.Variable(tf.random_normal([800,784], mean=0, stddev=1)))
-o_s.append(  tf.Variable(tf.random_normal([800,1],mean= 0, stddev=1)))
-
-#Parameters
-a_c.append( tf.placeholder(tf.float32, shape= (784,None)))
-a_d.append( tf.placeholder(tf.float32, shape= (784,None)))
 
 #L is the number of Hidden Layers here
 L =2
@@ -45,13 +60,6 @@ batch_size = 32
 for l in range(1,L+1):
 
     #declaring the tensorflow variables
-    a_m.append(  tf.Variable(tf.random_normal([800,1],mean= 0, stddev=1)))
-    a_s.append(  tf.Variable(tf.random_normal([800,1],mean= 0, stddev=1)))
-    o_m.append(  tf.Variable(tf.random_normal([800,1],mean= 0, stddev=1)))
-    o_s.append(  tf.Variable(tf.random_normal([800,1],mean= 0, stddev=1)))
-    W_m.append(  tf.Variable(tf.random_normal([800,784],mean= 0, stddev=1)))
-    w_s.append( tf.Variable(tf.random_normal([800,784],mean=0, stddev=1)))
-    o_s.append(  tf.Variable(tf.random_normal([800,1],mean= 0, stddev=1)))
 
     #Equation 1
     a_m[l-1],a_s[l-1] = transformFunction( a_c[l-1], a_d[l-1]) 
@@ -79,8 +87,8 @@ for l in range(1,L+1):
     a_c[l], a_d[l] = transformFunctionInverse(a_m[l], a_s[l])
 
 # Adjusting the last layer W_m and W_s
-W_m[L] = tf.Variable( tf.random_normal([10,800],mean = 0, stddev=1))
-w_s[L] = tf.Variable( tf.random_normal([10,800], mean=0, stddev=1))
+W_m[L] = tf.Variable( tf.random_normal([10,num_hidden_units],mean = 0, stddev=1))
+W_s[L] = tf.Variable( tf.random_normal([10,num_hidden_units], mean=0, stddev=1))
 
 #Equation 1
 a_m[L-1],a_s[L-1] = transformFunction( a_c[L-1], a_d[L-1]) 
