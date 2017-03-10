@@ -1,4 +1,4 @@
-#We have taken help from example code from https://github.com/aymericdamien/TensorFlow-Examples/blob/master/examples/3_NeuralNetworks/multilayer_perceptron.py 
+#We have taken help from example code from https://github.com/aymericdamien/TensorFlow-Examples/blob/master/examples/3_NeuralNetworks/multilayer_perceptron.py
 from math import pi
 import math
 import tensorflow as tf
@@ -39,7 +39,7 @@ def declareVariables():
     #For First Layer
     o_m.append("dummy")
     o_d.append("dummy")
-    o_s.append("dummy") #Dummy Variables to keep equations consistent 
+    o_s.append("dummy") #Dummy Variables to keep equations consistent
     o_c.append("dummy") # Dummy Variable to eep equations consistent
     W_m.append("dummy")
     W_s.append("dummy")
@@ -78,7 +78,7 @@ def declareVariables():
 
 
 
-    
+
 
 
 #L is the number of Hidden Layers here
@@ -92,13 +92,13 @@ for l in range(1,L+1):
     #declaring the tensorflow variables
 
     #Equation 1
-    o_m[l] =  tf.matmul(W_m[l], a_m[l-1]) + b_m[l] 
+    o_m[l] =  tf.matmul(W_m[l], a_m[l-1]) + b_m[l]
 
     #Equation 2
     term_1 = tf.matmul(W_s[l], a_s[l-1])
-    term_2 = tf.matmul( tf.mul( W_m[l], W_m[l] ), a_s[l-1] ) 
-    term_3 = tf.matmul(W_s[l-1], tf.multiply( a_m[l-1], a_m[l-1]))
-    o_s[l] =  term1 + term_2+ term_3 + b_s[l]
+    term_2 = tf.matmul( tf.mul( W_m[l], W_m[l] ), a_s[l-1] )
+    term_3 = tf.matmul(W_s[l], tf.multiply( a_m[l-1], a_m[l-1]))
+    o_s[l] =  term_1 + term_2+ term_3 + b_s[l]
 
     #Equation 3
     o_c[l],o_d[l] = transformFunctionInverse(o_m[l],o_s[l])
@@ -120,12 +120,12 @@ W_m[L] = tf.Variable( tf.random_normal([10,num_hidden_units],mean = 0, stddev=1)
 W_s[L] = tf.Variable( tf.random_normal([10,num_hidden_units], mean=0, stddev=1))
 
 #Equation 1
-a_m[L-1],a_s[L-1] = transformFunction( a_c[L-1], a_d[L-1]) 
-o_m[L] =  tf.matmul(a_m[L-1],W_m[L-1]) + b_m[L] 
+a_m[L-1],a_s[L-1] = transformFunction( a_c[L-1], a_d[L-1])
+o_m[L] =  tf.matmul(a_m[L-1],W_m[L-1]) + b_m[L]
 
 #Equation 2
 term_1 = tf.matmul(W_s[L],a_s[L-1])
-term_2 = tf.matmul( tf.mul( W_m[L-1], W_m[L-1] ), a_s[L-1] ) 
+term_2 = tf.matmul( tf.mul( W_m[L-1], W_m[L-1] ), a_s[L-1] )
 term_3 = tf.matmul(w_s[L],tf.multiply( a_m[L-1], a_m[L-1]))
 o_s[L] =  term1 + term_2+ term_3 + b_s[L]
 
