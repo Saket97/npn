@@ -52,8 +52,8 @@ def declareVariables():
     a_m.append( tf.placeholder(tf.float32, shape= (dim_inputs,None)))
     a_s.append( tf.placeholder(tf.float32, shape= (dim_inputs,None)))
 
-    W_m.append(tf.Variable( tf.random_normal([num_hidden_units,1], mean = 0 ,stddev =1 )))
-    W_s.append(tf.Variable( tf.random_normal([num_hidden_units,1], mean = 0 ,stddev =1 )))
+    W_m.append(tf.Variable( tf.random_normal([num_hidden_units,dim_inputs], mean = 0 ,stddev =1 )))
+    W_s.append(tf.Variable( tf.random_normal([num_hidden_units,dim_inputs], mean = 0 ,stddev =1 )))
     b_m.append(tf.Variable( tf.random_normal([num_hidden_units,1], mean = 0 ,stddev =1 )))
     b_s.append(tf.Variable( tf.random_normal([num_hidden_units,1], mean = 0 ,stddev =1 )))
     o_s.append(tf.Variable( tf.random_normal([num_hidden_units,1], mean = 0 ,stddev =1 )))
