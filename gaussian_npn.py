@@ -53,6 +53,8 @@ a_s.append(tf.zeros(shape=[units[0],1]))
 for l in range(1,L+1):
     a_m.append(0)
     a_s.append(0)
+    a_c.append(0)
+    a_d.append(0)
     o_m.append(0)
     o_s.append(0)
     o_c.append(0)
@@ -74,9 +76,10 @@ for l in range(1, L+1):
     a_m[l] = tf.sigmoid(tmp)
     tmp = Alpha*(o_c[l]+Beta)/((1+c_square*Alpha*Alpha*o_d[l])**0.5)
     a_s[l] = tf.sigmoid(tmp) - a_m[l]*a_m[l]
+    print("val l : ",l,len(a_c),len(a_d),len(a_m),len(a_s))
     a_c[l], a_d[l] = transformFunctionInverse(a_m[l], a_s[l])
 
 x = tf.placeholder(tf.float32, [None, 784])
 y_ = tf.placeholder(tf.float32, [None, 10])
-# y = 
+# y =
 cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=y_, logits=y))
