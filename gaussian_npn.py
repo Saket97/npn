@@ -10,7 +10,7 @@ train_epoch = 1
 dim_inputs = 784
 units = [784,800,800,10]
 L = 3
-batch_size = 64
+batch_size = 1
 
 
 mnist = input_data.read_data_sets("data/", one_hot=True)
@@ -28,8 +28,9 @@ with graph.as_default():
         return x,y
 
     def weight_variable(shape):
-        initial = tf.truncated_normal(shape, stddev=0.1)
-        return tf.Variable(initial)
+        return tf.Variable(tf.truncated_normal(shape))
+        #initial = tf.random_uniform(shape, -1.0,1.0)
+        #return tf.Variable(initial)
 
     image_batch = tf.placeholder(tf.float32,[batch_size,784])
     label_batch = tf.placeholder(tf.float32,[batch_size,10])
@@ -57,7 +58,6 @@ with graph.as_default():
 
     # declare  model
     #Input layer
-
 
     a_m.append(tf.placeholder(tf.float32, shape=[units[0],1]))
     a_s.append(tf.zeros(shape=[units[0],1]))
@@ -91,24 +91,26 @@ with graph.as_default():
             a_s[l] = tf.sigmoid(tmp) - a_m[l]*a_m[l]
             #print("val l : ",l,len(a_c),len(a_d),len(a_m),len(a_s))
             a_c[l], a_d[l] = transformFunctionInverse(a_m[l], a_s[l])
-        return o_c[l]
+        return o_c[l],o_c[2]
 
 
     predictions=[]
-    for image in tf.unpack(image_batch):
+    for image in tf.unstack(image_batch):
         image = tf.reshape(image,shape=[units[0],1])
-        predictions.append(tf.reshape(forward_pass(image),shape= [1,units[3]]))
-    predictions = tf.reshape(tf.pack(predictions),shape = [batch_size,10])
+        predict,a = forward_pass(image)
+        predictions.append(tf.reshape(predict,shape= [1,units[3]]))
+    predictions = tf.reshape(tf.stack(predictions),shape = [batch_size,10])
     #print("Pred shape:",predictions)
+    image = forward_pass(image)
     correct_prediction = tf.equal(tf.argmax(label_batch,1), tf.argmax(predictions,1))
     accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
 
-    cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels = label_batch,logits= predictions))/batch_size
-
+#    cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels = label_batch,logits= predictions))/batch_size
+    cross_entropy = (tf.reduce_mean(predictions-label_batch))
     optimizer = tf.train.AdamOptimizer().minimize(cross_entropy)
 
 
-init = tf.global_variables_initializer()
+#init = tf.global_variables_initializer()
 with tf.Session(graph=graph) as sess:
     print "Running Session"
     sess.run(tf.global_variables_initializer())
@@ -116,6 +118,9 @@ with tf.Session(graph=graph) as sess:
     for epoch in range(train_epoch):
         for step in range(num_train/batch_size):
             x_train, y_train = mnist.train.next_batch(batch_size)
-            pred, acc,loss, _ = sess.run([predictions,accuracy,cross_entropy,optimizer],feed_dict={image_batch:x_train,label_batch:y_train})
+            pred, acc,loss= sess.run([a,accuracy,cross_entropy],feed_dict={image_batch:x_train,label_batch:y_train})
             print("Epoch:",epoch," Step:",step," acc: ",acc," loss:",loss)
-
+            print (pred)
+            break
+        break
+    print pred
