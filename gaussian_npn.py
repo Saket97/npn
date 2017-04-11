@@ -118,5 +118,5 @@ with tf.Session(graph=graph) as sess:
     for epoch in range(train_epoch):
         for step in range(num_train/batch_size):
             x_train, y_train = mnist.train.next_batch(batch_size)
-            pred, acc,loss= sess.run([predictions,accuracy,cross_entropy],feed_dict={image_batch:x_train,label_batch:y_train})
+            pred, acc,loss,_= sess.run([predictions,accuracy,cross_entropy,optimizer],feed_dict={image_batch:x_train,label_batch:y_train})
             print("Epoch:",epoch," Step:",step," acc: ",acc," loss:",loss)
