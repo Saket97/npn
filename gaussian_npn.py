@@ -6,11 +6,11 @@ from tensorflow.examples.tutorials.mnist import input_data
 # constants declaration
 num_hidden_units = 800
 num_train = 55000
-train_epoch = 1
+train_epoch = 10
 dim_inputs = 784
 units = [784,800,800,10]
 L = 3
-batch_size = 1
+batch_size = 128
 
 
 mnist = input_data.read_data_sets("data/", one_hot=True)
@@ -85,13 +85,13 @@ with graph.as_default():
             o_m[l] = tf.matmul(W_m[l], a_m[l-1]) + b_m[l]
             o_s[l] = tf.matmul(W_s[l], a_s[l-1]) + tf.matmul(W_m[l]*W_m[l], a_s[l-1]) + tf.matmul(W_s[l], a_m[l-1]*a_m[l-1]) + b_s[l]
             o_c[l], o_d[l] = transformFunctionInverse(o_m[l], o_s[l])
-            tmp = o_c[l]/((1+c_square*o_d[l])**0.5)
+            tmp = o_c[l]/((1+tf.abs(c_square*o_d[l]))**0.5)
             a_m[l] = tf.sigmoid(tmp)
-            tmp = Alpha*(o_c[l]+Beta)/((1+c_square*Alpha*Alpha*o_d[l])**0.5)
+            tmp = Alpha*(o_c[l]+Beta)/((1+tf.abs(c_square*Alpha*Alpha*o_d[l]))**0.5)
             a_s[l] = tf.sigmoid(tmp) - a_m[l]*a_m[l]
             #print("val l : ",l,len(a_c),len(a_d),len(a_m),len(a_s))
             a_c[l], a_d[l] = transformFunctionInverse(a_m[l], a_s[l])
-        return o_c[l],o_c[2]
+        return o_c[l],a_m[1]
 
 
     predictions=[]
@@ -105,8 +105,8 @@ with graph.as_default():
     correct_prediction = tf.equal(tf.argmax(label_batch,1), tf.argmax(predictions,1))
     accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
 
-#    cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels = label_batch,logits= predictions))/batch_size
-    cross_entropy = (tf.reduce_mean(predictions-label_batch))
+    cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels = label_batch,logits= predictions))
+    #cross_entropy = (tf.reduce_mean(predictions-label_batch))
     optimizer = tf.train.AdamOptimizer().minimize(cross_entropy)
 
 
@@ -118,9 +118,5 @@ with tf.Session(graph=graph) as sess:
     for epoch in range(train_epoch):
         for step in range(num_train/batch_size):
             x_train, y_train = mnist.train.next_batch(batch_size)
-            pred, acc,loss= sess.run([a,accuracy,cross_entropy],feed_dict={image_batch:x_train,label_batch:y_train})
+            pred, acc,loss= sess.run([predictions,accuracy,cross_entropy],feed_dict={image_batch:x_train,label_batch:y_train})
             print("Epoch:",epoch," Step:",step," acc: ",acc," loss:",loss)
-            print (pred)
-            break
-        break
-    print pred
