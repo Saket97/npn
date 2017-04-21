@@ -2,34 +2,46 @@ import numpy as np
 import tensorflow as tf
 import math
 class Model:
-    def __init__(self,data,target,size=[4,1,1]):
+    def __init__(self,data,target,word_dim=8000,hidden=128):
+        self.input = data
+        self.target = target
         self.c_square = tf.constant(math.pi)
         self.alpha = tf.constant(8-4*math.sqrt(2.0))
         self.Beta = tf.constant(-0.5*math.log(math.sqrt(2.0)+1))
-        self.size = size
+        self.hidden_dim = hidden
+        self.word_dim = word_dim
 
     def transformFunction(x,y):
         return x,y
 
-    def transforInverse(x,y):
+    def transformFunctionInverse(x,y):
         return x,y
 
-    def npn_ops(self,weights,biases,i_m,i_s,i_c,i_d):
-        o_m = tf.matmul(weights[0,:,:],i_m)+biases[1,:]
-        o_s = tf.matmul(weights[1,:,:], i_s) + tf.matmul(weights[0,:,:]*weights[0,:,:], a_s[l-1]) + tf.matmul(weights[1,:,:], i_m*i_m)
-        o_c, o_d = transformFunctionInverse(o_m, o_s)
-        tmp = o_c/((1+tf.abs(self.c_squaree*o_d))**0.5)
-        a_m = tf.sigmoid(tmp)
-        tmp = Alpha*(o_c+self.Beta)/((1+tf.abs(self.c_square*self.Alpha*self.Alpha*o_d))**0.5)
-        a_s = tf.sigmoid(tmp) - a_m*a_m
-        a_c, a_d = transformFunctionInverse(a_m, a_s)
-        return a_m,a_s,a_c,a_d
+    def npn_ops(self,weights,biases,i):
+        o = [None]*4
+        a = [None]*4
+        o[0] = tf.matmul(weights[0,:,:],i[0])+biases[1,:]
+        o[1] = tf.matmul(weights[1,:,:], i[1]) + tf.matmul(weights[0,:,:]*weights[0,:,:], i[1]) + tf.matmul(weights[1,:,:], i[0]*i[0])
+        o[2], o[3] = self.transformFunctionInverse(o[0], o[1])
+        tmp = o[2]/((1+tf.abs(self.c_square*o[3]))**0.5)
+        a[1] = tf.sigmoid(tmp)
+        tmp = self.Alpha*(o[2]+self.Beta)/((1+tf.abs(self.c_square*self.Alpha*self.Alpha*o[3]))**0.5)
+        a[1] = tf.sigmoid(tmp) - a[0]*a[0]
+        a[2], a[3] = self.transformFunctionInverse(a[0], a[1])
+        return a
 
-    def rnn_cell(self,inputs):
-        U_weights = tf.get_variable("U_weights",self.size,tf.random_normal_initializer())
-        V_weights = tf.get_variable("V_weights",self.size,tf.random_normal_initializer())
-        W_weights = tf.get_variable("W_weights",self.size,tf.random_normal_initializer())
-        return
+    def rnn_cell(self,inputs,state_old):
+
+        U_weights = tf.get_variable("U_weights",[4,self.hidden_dim,self.word_dim],tf.random_normal_initializer())
+        U_biases = tf.get_variable("U_biases",[4,self.hidden_dim],tf.random_normal_initializer())
+        V_weights = tf.get_variable("V_weights",[4,self.word_dim,self.hidden_dim],tf.random_normal_initializer())
+        V_biases = tf.get_variable("V_biases",[4,self.word_dim],tf.random_normal_initializer())
+        W_biases = tf.get_variable("W_biases",[4,self.hidden_dim,self.hidden_dim],tf.random_normal_initializer())
+        W_weights = tf.get_variable("W_weights",[4,self.hidden_dim],tf.random_normal_initializer())
+        state = npn_ops(U_weights,U_biases,inputs)+npn_ops(W_weights,W_biases,state_old)
+        out = npn_ops(W_weights,W_biases,state)
+
+        return out,state
 
 
     def predicton(self):
