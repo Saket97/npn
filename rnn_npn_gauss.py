@@ -11,6 +11,7 @@ class Model:
         self.Beta = tf.constant(-0.5*math.log(math.sqrt(2.0)+1))
         self.hidden_dim = hidden
         self.word_dim = word_dim
+        self.embedding_size = 256
 
     def transformFunction(x,y):
         return x,y
@@ -53,22 +54,24 @@ class Model:
 
     def prediction(self,input):
         with tf.variable_scope('word_embedding'):
-            w_word = tf.get_variable(name = 'w_word', shape =[vocab_size,embedding_size], initializer = tf.truncated_normal_initializer())
-            b_word = tf.get_variable(name = 'b_word', shape =[1,embedding_size], initializer =tf.constant_initializer(0.1))
-
+            w_word = tf.get_variable(name = 'w_word', shape =[self.word_dim,self.embedding_size], initializer = tf.truncated_normal_initializer())
+            b_word = tf.get_variable(name = 'b_word', shape =[1,self.embedding_size], initializer =tf.constant_initializer(0.1))
         length_sent = self.length(input)
-
+        with tf.variable_scope('word_vocab'):
+            w_vocab = tf.get_variable(name = 'w_vocab', shape =[self.embedding_size,self.word_dim], initializer = tf.truncated_normal())
+            #b_vocab = tf.get_variable(name = 'b_vocab', shape =[1,vocab_size], initializer =tf.constant_initializer(0.1))
         i = 0
         l = 0
         out_list = []
 
         for sent in tf.unstack(input):
             state = [tf.zeros([self.hidden_dim]),tf.zeros([self.hidden_dim])]
+            out_vocab = tf.zeros([self.word_dim])
             j = 0
             l = 0
             sent_embed = tf.matmul(sent,w_word)+b_word
-            cond_1 = lambda index_word,state,out: tf.less(index_word,length_sent[i])
-            def body_1(index_word,state,out):
+            cond_1 = lambda index_word,state,out_vocab: tf.less(index_word,length_sent[i])
+            def body_1(index_word,state,out_vocab):
                 global l,j
                 word = sent_embed[j]
                 if l==0:
@@ -78,11 +81,12 @@ class Model:
                 else:
                     with tf.variable_scope('rnn_1',reuse=True):
                         out, state = self.rnn_cell(word,state)
+                out_vocab = self.npn_ops(w_vocab, out)[0]
                 j+=1
                 index_word = index_word + tf.constant(1)
-            return index_word,state,out
-            index_word,state,out = tf.while_loop(cond_1, body_1, [index_word,state,out],swap_memory = True)
-            out_list.append(out)
+            return index_word,state,out_vocab
+            index_word,state,out_vocab = tf.while_loop(cond_1, body_1, [index_word,state,out_vocab],swap_memory = True)
+            out_list.append(out_vocab)
             i+=1
         return out_list
 
@@ -91,6 +95,23 @@ class Model:
         loss = tf.nn.softmax_cross_entropy_with_logits(labels = target,logits = predictions)
         optimizer = tf.train.AdamOptimizer().minimize(loss)
         return loss
+
+    def train(self,input_file,target_file,epochs,batch_size):
+        X = np.load(input_file)
+        Y = np.load(target_file)
+        input = tf.placeholder(tf.float32, [None, 791])
+        target = tf.placeholder(tf.float32, [None, 791])
+        sess = tf.Session()
+        sess.run(tf.global_variables_initializer())
+        for epoch in range(train_epoch):
+            for step in range(num_train/batch_size):
+                offset = (step * batch_size) % (train_labels.shape[0] - batch_size)
+                # Generate a minibatch.
+                batch_data = X[offset:(offset + batch_size), :]
+                batch_labels = Y[offset:(offset + batch_size), :]
+                pred,loss,_= sess.run([predictions,loss,optimizer],feed_dict={input:batch_data,target: batch_labels})
+                print("Epoch:",epoch," Step:",step," acc: ",acc," loss:",loss)
+        return
 
     def error(self):
         return
