@@ -43,8 +43,20 @@ for i, sent in enumerate(tokenized_sentences):
         tokenized_sentences[i] = [w if w in word_to_index else unknown_token for w in sent]
 print tokenized_sentences[0]
 # Create the training data
+def numpy_fillna(data):
+    # Get lengths of each row of data
+    lens = np.array([len(i) for i in data])
+   # Mask of valid places in each row
+    mask = np.arange(lens.max()) < lens[:,None]
+    # Setup output array and put elements from data into
+    # masked positions
+    out = np.zeros(mask.shape, dtype=data.dtype)
+    out[mask] = np.concatenate(data)
+    return out
+
 X_train = np.asarray([[word_to_index[w] for w in sent[:-1]] for sent in tokenized_sentences])
 Y_train = np.asarray([[word_to_index[w] for w in sent[1:]] for sent in tokenized_sentences])
+X_train = numpy_fillna(X_train)
+Y_train = numpy_fillna(Y_train)
 np.save('data/X_train.npy',X_train)
 np.save('data/Y_train.npy',Y_train)
-
