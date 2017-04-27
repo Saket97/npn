@@ -32,8 +32,8 @@ with graph.as_default():
         #initial = tf.random_uniform(shape, -1.0,1.0)
         #return tf.Variable(initial)
 
-    image_batch = tf.placeholder(tf.float32,[batch_size,784])
-    label_batch = tf.placeholder(tf.float32,[batch_size,10])
+    image_batch = tf.placeholder(tf.float32,[None,784])
+    label_batch = tf.placeholder(tf.float32,[None,10])
 
     # output of each neuron
     o_m = ["dummy"]
@@ -120,3 +120,5 @@ with tf.Session(graph=graph) as sess:
             x_train, y_train = mnist.train.next_batch(batch_size)
             pred, acc,loss,_= sess.run([predictions,accuracy,cross_entropy,optimizer],feed_dict={image_batch:x_train,label_batch:y_train})
             print("Epoch:",epoch," Step:",step," acc: ",acc," loss:",loss)
+        acc = sess.run(accuracy,feed_dict={image_batch:mnist.test.images,label_batch:mnist.test.labels})
+        print("Test Accuracy: ",acc)
