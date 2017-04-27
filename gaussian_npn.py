@@ -120,3 +120,10 @@ with tf.Session(graph=graph) as sess:
             x_train, y_train = mnist.train.next_batch(batch_size)
             pred, acc,loss,_= sess.run([predictions,accuracy,cross_entropy,optimizer],feed_dict={image_batch:x_train,label_batch:y_train})
             print("Epoch:",epoch," Step:",step," acc: ",acc," loss:",loss)
+        acc_total = 0
+        for step in range(10000/batch_size):
+            x_test,y_test = mnist.test.next_batch(batch_size)
+            pred, acc,loss= sess.run([predictions,accuracy,cross_entropy],feed_dict={image_batch:x_test,label_batch:y_test})
+            acc_total+=acc
+            print("Epoch:",epoch," Step:",step," acc_test: ",acc_total/step," loss:",loss)
+
