@@ -2,7 +2,7 @@ from math import pi
 import math
 import tensorflow as tf
 from tensorflow.examples.tutorials.mnist import input_data
-
+#Gamma_NPN
 # constants declaration
 num_hidden_units = 800
 num_train = 55000
@@ -10,6 +10,8 @@ train_epoch = 10
 dim_inputs = 784
 units = [784,800,800,10]
 L = 3
+r = 1.0
+tau = 0.1
 batch_size = 128
 
 
@@ -18,22 +20,23 @@ mnist = input_data.read_data_sets("data/", one_hot=True)
 
 graph = tf.Graph()
 with graph.as_default():
+    
     c_square = tf.constant(pi)
     Alpha = tf.constant(8-4*math.sqrt(2.0))
     Beta = tf.constant(-0.5*math.log(math.sqrt(2.0)+1))
     def transformFunction(x,y):
-        return x,y
+        return x/y, x/tf.pow(y,2)
 
     def transformFunctionInverse(x,y):
-        return x,y
+        return tf.pow(x,2)/y,x/y
 
     def weight_variable(shape):
         return tf.Variable(tf.truncated_normal(shape))
         #initial = tf.random_uniform(shape, -1.0,1.0)
         #return tf.Variable(initial)
 
-    image_batch = tf.placeholder(tf.float32,[batch_size,784])
-    label_batch = tf.placeholder(tf.float32,[batch_size,10])
+    image_batch = tf.placeholder(tf.float32,[None,784])
+    label_batch = tf.placeholder(tf.float32,[None,10])
 
     # output of each neuron
     o_m = ["dummy"]
@@ -85,10 +88,8 @@ with graph.as_default():
             o_m[l] = tf.matmul(W_m[l], a_m[l-1]) + b_m[l]
             o_s[l] = tf.matmul(W_s[l], a_s[l-1]) + tf.matmul(W_m[l]*W_m[l], a_s[l-1]) + tf.matmul(W_s[l], a_m[l-1]*a_m[l-1]) + b_s[l]
             o_c[l], o_d[l] = transformFunctionInverse(o_m[l], o_s[l])
-            tmp = o_c[l]/((1+tf.abs(c_square*o_d[l]))**0.5)
-            a_m[l] = tf.sigmoid(tmp)
-            tmp = Alpha*(o_c[l]+Beta)/((1+tf.abs(c_square*Alpha*Alpha*o_d[l]))**0.5)
-            a_s[l] = tf.sigmoid(tmp) - a_m[l]*a_m[l]
+            a_m[l] =r*(1 - tf.pow(tf.abs((o_d[l])/(o_d[l]+tau)),o_c[l]))
+            a_s[l] =tf.pow(r,2)*( tf.pow(tf.abs((o_d[l])/(o_d[l]+2*tau)),o_c[l])- tf.pow(tf.abs((o_d[l])/(o_d[l]+tau)),2*o_c[l]))
             #print("val l : ",l,len(a_c),len(a_d),len(a_m),len(a_s))
             a_c[l], a_d[l] = transformFunctionInverse(a_m[l], a_s[l])
         return o_c[l],a_m[1]
@@ -108,6 +109,7 @@ with graph.as_default():
     cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels = label_batch,logits= predictions))
     #cross_entropy = (tf.reduce_mean(predictions-label_batch))
     optimizer = tf.train.AdamOptimizer().minimize(cross_entropy)
+    saver = tf.train.Saver()()()
 
 
 #init = tf.global_variables_initializer()
@@ -119,4 +121,8 @@ with tf.Session(graph=graph) as sess:
         for step in range(num_train/batch_size):
             x_train, y_train = mnist.train.next_batch(batch_size)
             pred, acc,loss,_= sess.run([predictions,accuracy,cross_entropy,optimizer],feed_dict={image_batch:x_train,label_batch:y_train})
-            print("Epoch:",epoch," Step:",step," acc: ",acc," loss:",loss)
+            if step%10 == 0:
+                print("Epoch:",epoch," Step:",step," acc: ",acc," loss:",loss)
+        acc = sess.run(accuracy,feed_dict={image_batch:mnist.test.images,label_batch:mnist.test.labels})
+        print("Test Accuracy: ",acc)
+        saver.save(sess,'gamma-npn',global_step = epoch)

@@ -3,6 +3,7 @@ import math
 import tensorflow as tf
 from tensorflow.examples.tutorials.mnist import input_data
 
+mnist = input_data.read_data_sets("data/", one_hot=True)
 # constants declaration
 num_hidden_units = 800
 num_train = 55000
@@ -10,10 +11,10 @@ train_epoch = 10
 dim_inputs = 784
 units = [784,800,800,10]
 L = 3
-batch_size = 128
+train_batch_size = 128
+test_batch_size = len(mnist.test.labels)
 
 
-mnist = input_data.read_data_sets("data/", one_hot=True)
 
 
 graph = tf.Graph()
@@ -32,8 +33,9 @@ with graph.as_default():
         #initial = tf.random_uniform(shape, -1.0,1.0)
         #return tf.Variable(initial)
 
-    image_batch = tf.placeholder(tf.float32,[batch_size,784])
-    label_batch = tf.placeholder(tf.float32,[batch_size,10])
+    image_batch = tf.placeholder(tf.float32,[None,784])
+    label_batch = tf.placeholder(tf.float32,[None,10])
+    batch_size =tf.placeholder(tf.int32 ,[1])
 
     # output of each neuron
     o_m = ["dummy"]
@@ -61,6 +63,7 @@ with graph.as_default():
 
     a_m.append(tf.placeholder(tf.float32, shape=[units[0],1]))
     a_s.append(tf.zeros(shape=[units[0],1]))
+
     for l in range(1,L+1):
         a_m.append(0)
         a_s.append(0)
@@ -95,7 +98,7 @@ with graph.as_default():
 
 
     predictions=[]
-    for image in tf.unstack(image_batch):
+    for image in tf.dynamic_partition(image_batch, range(0,batch_size),batch_size):
         image = tf.reshape(image,shape=[units[0],1])
         predict,a = forward_pass(image)
         predictions.append(tf.reshape(predict,shape= [1,units[3]]))
@@ -108,6 +111,7 @@ with graph.as_default():
     cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels = label_batch,logits= predictions))
     #cross_entropy = (tf.reduce_mean(predictions-label_batch))
     optimizer = tf.train.AdamOptimizer().minimize(cross_entropy)
+    saver = tf.train.Saver()
 
 
 #init = tf.global_variables_initializer()
@@ -120,10 +124,10 @@ with tf.Session(graph=graph) as sess:
             x_train, y_train = mnist.train.next_batch(batch_size)
             pred, acc,loss,_= sess.run([predictions,accuracy,cross_entropy,optimizer],feed_dict={image_batch:x_train,label_batch:y_train})
             print("Epoch:",epoch," Step:",step," acc: ",acc," loss:",loss)
+
         acc_total = 0
         for step in range(10000/batch_size):
             x_test,y_test = mnist.test.next_batch(batch_size)
             pred, acc,loss= sess.run([predictions,accuracy,cross_entropy],feed_dict={image_batch:x_test,label_batch:y_test})
             acc_total+=acc
             print("Epoch:",epoch," Step:",step," acc_test: ",acc_total/step," loss:",loss)
-
