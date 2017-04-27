@@ -11,8 +11,8 @@ train_epoch = 10
 dim_inputs = 784
 units = [784,800,800,10]
 L = 3
-train_batch_size = 128
-test_batch_size = len(mnist.test.labels)
+batch_size = 128
+
 
 
 
@@ -33,9 +33,9 @@ with graph.as_default():
         #initial = tf.random_uniform(shape, -1.0,1.0)
         #return tf.Variable(initial)
 
-    image_batch = tf.placeholder(tf.float32,[None,784])
-    label_batch = tf.placeholder(tf.float32,[None,10])
-    batch_size =tf.placeholder(tf.int32 ,[1])
+    image_batch = tf.placeholder(tf.float32,[batch_size,784])
+    label_batch = tf.placeholder(tf.float32,[batch_size,10])
+
 
     # output of each neuron
     o_m = ["dummy"]
@@ -98,7 +98,7 @@ with graph.as_default():
 
 
     predictions=[]
-    for image in tf.dynamic_partition(image_batch, range(0,batch_size),batch_size):
+    for image in tf.unstack(image_batch):
         image = tf.reshape(image,shape=[units[0],1])
         predict,a = forward_pass(image)
         predictions.append(tf.reshape(predict,shape= [1,units[3]]))
@@ -113,12 +113,18 @@ with graph.as_default():
     optimizer = tf.train.AdamOptimizer().minimize(cross_entropy)
 
 
-saver = tf.train.Saver()
+    saver = tf.train.Saver()
 #init = tf.global_variables_initializer()
+
+new_saver = tf.train.import_meta_graph('model.ckpt.meta')
 with tf.Session(graph=graph) as sess:
+
+
+
     print("Running Session")
-    sess.run(tf.global_variables_initializer())
+    #sess.run(tf.global_variables_initializer())
     print("Session initialized")
+    new_saver.restore(sess, tf.train.latest_checkpoint('./'))
     for epoch in range(train_epoch):
         for step in range(num_train/batch_size):
             x_train, y_train = mnist.train.next_batch(batch_size)
