@@ -20,6 +20,7 @@ mnist = input_data.read_data_sets("data/", one_hot=True)
 
 graph = tf.Graph()
 with graph.as_default():
+    
     c_square = tf.constant(pi)
     Alpha = tf.constant(8-4*math.sqrt(2.0))
     Beta = tf.constant(-0.5*math.log(math.sqrt(2.0)+1))
@@ -108,6 +109,7 @@ with graph.as_default():
     cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels = label_batch,logits= predictions))
     #cross_entropy = (tf.reduce_mean(predictions-label_batch))
     optimizer = tf.train.AdamOptimizer().minimize(cross_entropy)
+    saver = tf.train.Saver()()()
 
 
 #init = tf.global_variables_initializer()
@@ -123,3 +125,4 @@ with tf.Session(graph=graph) as sess:
                 print("Epoch:",epoch," Step:",step," acc: ",acc," loss:",loss)
         acc = sess.run(accuracy,feed_dict={image_batch:mnist.test.images,label_batch:mnist.test.labels})
         print("Test Accuracy: ",acc)
+        saver.save(sess,'gamma-npn',global_step = epoch)
