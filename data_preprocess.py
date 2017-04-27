@@ -30,18 +30,18 @@ print "Found %d unique words tokens." % len(word_freq.items())
 
 # Get the most common words and build index_to_word and word_to_index vectors
 vocab = word_freq.items()[:vocabulary_size-1]
-print vocab
-index_to_word = [v for k, v in vocab]
+#print vocab
+index_to_word = [k for k, v in vocab]
 index_to_word.append(unknown_token)
 word_to_index = dict([(w,i) for i,w in enumerate(index_to_word)])
-
+print word_to_index
 print "Using vocabulary size %d." % vocabulary_size
 print "The least frequent word in our vocabulary is '%s' and appeared %d times." % (vocab[-1][0], vocab[-1][1])
 
 # Replace all words not in our vocabulary with the unknown token
 for i, sent in enumerate(tokenized_sentences):
         tokenized_sentences[i] = [w if w in word_to_index else unknown_token for w in sent]
-
+print tokenized_sentences[0]
 # Create the training data
 X_train = np.asarray([[word_to_index[w] for w in sent[:-1]] for sent in tokenized_sentences])
 Y_train = np.asarray([[word_to_index[w] for w in sent[1:]] for sent in tokenized_sentences])
