@@ -112,9 +112,9 @@ with graph.as_default():
 
 #init = tf.global_variables_initializer()
 with tf.Session(graph=graph) as sess:
-    print "Running Session"
+    print("Running Session")
     sess.run(tf.global_variables_initializer())
-    print "Session initialized"
+    print("Session initialized")
     for epoch in range(train_epoch):
         for step in range(num_train/batch_size):
             x_train, y_train = mnist.train.next_batch(batch_size)
