@@ -52,31 +52,41 @@ class Model:
         return length
 
     def prediction(self,input):
-         with tf.variable_scope('word_embedding'):
+        with tf.variable_scope('word_embedding'):
             w_word = tf.get_variable(name = 'w_word', shape =[vocab_size,embedding_size], initializer =tf.truncated_normal_initi
-            b_word = tf.get_variable(name = 'b_word', shape =[embedding_size], initializer =tf.constant_initializer(0.1))
+            b_word = tf.get_variable(name = 'b_word', shape =[1,embedding_size], initializer =tf.constant_initializer(0.1))
 
         length_sent = self.length(input)
 
-        state = [tf.zeros([self.hidden_dim]),tf.zeros([self.hidden_dim])]
         i = 0
         l = 0
+        out_list = []
 
         for sent in tf.unstack(input):
+            state = [tf.zeros([self.hidden_dim]),tf.zeros([self.hidden_dim])]
             j = 0
+            l = 0
             sent_embed = tf.matmul(sent,w_word)+b_word
-            cond_1 = lambda index_word,state: tf.less(index_word,length_sent[i])
-            def body_1(state):
-                global i,j
+            cond_1 = lambda index_word,state,out: tf.less(index_word,length_sent[i])
+            def body_1(index_word,state,out):
+                global l,j
                 word = sent_embed[j]
                 if l==0:
-                    with tf.variable
-
-        return
-
+                    with tf.variable_scope('rnn_1'):
+                        out, state = self.rnn_cell(word,state)
+                    l=1
+                else:
+                    with tf.variable_scope('rnn_1',reuse=True):
+                        out, state = self.rnn_cell(word,state)
+                j+=1
+                index_word = index_word + tf.constant(1)
+            return index_word,state,out
+            index_word,state,out = tf.while_loop(cond_1, body_1, [index_word,state,out],swap_memory = True)
+            out_list.append(tf.nn.softmax(out))
+            i+=1
 
     def optimize(self):
         return
 
-    def error(self):
+    def error(self):l
         return
