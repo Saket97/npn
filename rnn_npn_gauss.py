@@ -18,7 +18,7 @@ class Model:
     def transformFunctionInverse(x,y):
         return x,y
 
-    def npn_ops(self,weights,biases,i):
+    def npn_ops(self,weights,i):
         o = [None]*4
         a = [None]*4
         o[0] = tf.matmul(weights[0,:,:],i[0])
@@ -40,9 +40,9 @@ class Model:
         #W_biases = tf.get_variable("W_biases",[2,self.hidden_dim,self.hidden_dim],tf.random_normal_initializer())
         W_weights = tf.get_variable("W_weights",[2,self.hidden_dim,self.hidden_dim],tf.random_normal_initializer())
         state = [None]*2
-        state = (map(add,npn_ops(U_weights,U_biases,inputs)[0],npn_ops(W_weights,W_biases,state_old)[0])
+        state = map(add,npn_ops(U_weights,inputs)[0],npn_ops(W_weights,state_old)[0])
         state = [tf.tanh(x) for x in state]
-        out = npn_ops(W_weights,W_biases,state)[0]
+        out = npn_ops(V_weights,state)[0]
         return out,state
 
     def length(sequence):
@@ -53,7 +53,7 @@ class Model:
 
     def prediction(self,input):
         with tf.variable_scope('word_embedding'):
-            w_word = tf.get_variable(name = 'w_word', shape =[vocab_size,embedding_size], initializer =tf.truncated_normal_initi
+            w_word = tf.get_variable(name = 'w_word', shape =[vocab_size,embedding_size], initializer = tf.truncated_normal_initializer())
             b_word = tf.get_variable(name = 'b_word', shape =[1,embedding_size], initializer =tf.constant_initializer(0.1))
 
         length_sent = self.length(input)
@@ -82,11 +82,15 @@ class Model:
                 index_word = index_word + tf.constant(1)
             return index_word,state,out
             index_word,state,out = tf.while_loop(cond_1, body_1, [index_word,state,out],swap_memory = True)
-            out_list.append(tf.nn.softmax(out))
+            out_list.append(out)
             i+=1
+        return out_list
 
-    def optimize(self):
-        return
+    def optimize(self,input,target):
+        predictions = self.prediction(input)
+        loss = tf.nn.softmax_cross_entropy_with_logits(labels = target,logits = predictions)
+        optimizer = tf.train.AdamOptimizer().minimize(loss)
+        return loss
 
-    def error(self):l
+    def error(self):
         return
