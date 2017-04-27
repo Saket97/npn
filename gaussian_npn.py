@@ -111,9 +111,9 @@ with graph.as_default():
     cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels = label_batch,logits= predictions))
     #cross_entropy = (tf.reduce_mean(predictions-label_batch))
     optimizer = tf.train.AdamOptimizer().minimize(cross_entropy)
-    saver = tf.train.Saver()
 
 
+saver = tf.train.Saver()
 #init = tf.global_variables_initializer()
 with tf.Session(graph=graph) as sess:
     print("Running Session")
@@ -126,8 +126,12 @@ with tf.Session(graph=graph) as sess:
             print("Epoch:",epoch," Step:",step," acc: ",acc," loss:",loss)
 
         acc_total = 0
+
+        print("Saving Model")
+        save_path = saver.save(sess, "model.ckpt")
+        print("Model saved in file: %s" % save_path)
         for step in range(10000/batch_size):
             x_test,y_test = mnist.test.next_batch(batch_size)
             pred, acc,loss= sess.run([predictions,accuracy,cross_entropy],feed_dict={image_batch:x_test,label_batch:y_test})
             acc_total+=acc
-            print("Epoch:",epoch," Step:",step," acc_test: ",acc_total/step," loss:",loss)
+            print("Epoch:",epoch," Step:",step," acc_test: ",acc_total/(step+1)," loss:",loss)
