@@ -66,7 +66,7 @@ with graph.as_default():
     a_s.append(tf.zeros(shape=[units[0],1]))
     for l in range(1,L+1):
         a_m.append(0)
-        a_s.append(0)
+        a_s.append(1)
         a_c.append(0)
         a_d.append(0)
         o_m.append(0)
@@ -88,11 +88,11 @@ with graph.as_default():
             o_m[l] = tf.matmul(W_m[l], a_m[l-1]) + b_m[l]
             o_s[l] = tf.matmul(W_s[l], a_s[l-1]) + tf.matmul(W_m[l]*W_m[l], a_s[l-1]) + tf.matmul(W_s[l], a_m[l-1]*a_m[l-1]) + b_s[l]
             o_c[l], o_d[l] = transformFunctionInverse(o_m[l], o_s[l])
-            a_m[l] =r*(1 - tf.pow(tf.abs((o_d[l])/(o_d[l]+tau)),o_c[l]))
-            a_s[l] =tf.pow(r,2)*( tf.pow(tf.abs((o_d[l])/(o_d[l]+2*tau)),o_c[l])- tf.pow(tf.abs((o_d[l])/(o_d[l]+tau)),2*o_c[l]))
+            a_m[l] =tf.abs(r*(1 - tf.pow(tf.abs((o_d[l])/(o_d[l]+tau)),o_c[l])))
+            a_s[l] =tf.abs(tf.pow(r,2)*( tf.pow(tf.abs((o_d[l])/(o_d[l]+2*tau)),o_c[l])- tf.pow(tf.abs((o_d[l])/(o_d[l]+tau)),2*o_c[l])))
             #print("val l : ",l,len(a_c),len(a_d),len(a_m),len(a_s))
             a_c[l], a_d[l] = transformFunctionInverse(a_m[l], a_s[l])
-        return o_m[l],a_m[1]
+        return o_m[l],a_m[l]
 
 
     predictions=[]
