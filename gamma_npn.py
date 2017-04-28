@@ -25,10 +25,10 @@ with graph.as_default():
     Alpha = tf.constant(8-4*math.sqrt(2.0))
     Beta = tf.constant(-0.5*math.log(math.sqrt(2.0)+1))
     def transformFunction(x,y):
-        return x/y, x/tf.pow(y,2)
+        return x/y, x/y**2
 
     def transformFunctionInverse(x,y):
-        return tf.pow(x,2)/y,x/y
+        return x**2/y,x/y
 
     def weight_variable(shape):
         return tf.Variable(tf.truncated_normal(shape))
@@ -92,7 +92,7 @@ with graph.as_default():
             a_s[l] =tf.pow(r,2)*( tf.pow(tf.abs((o_d[l])/(o_d[l]+2*tau)),o_c[l])- tf.pow(tf.abs((o_d[l])/(o_d[l]+tau)),2*o_c[l]))
             #print("val l : ",l,len(a_c),len(a_d),len(a_m),len(a_s))
             a_c[l], a_d[l] = transformFunctionInverse(a_m[l], a_s[l])
-        return o_c[l],a_m[1]
+        return o_m[l],a_m[1]
 
 
     predictions=[]

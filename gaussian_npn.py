@@ -6,12 +6,12 @@ from tensorflow.examples.tutorials.mnist import input_data
 mnist = input_data.read_data_sets("data/", one_hot=True)
 # constants declaration
 num_hidden_units = 800
-num_train = 55000
+num_train = 50000
 train_epoch = 10
 dim_inputs = 784
 units = [784,800,800,10]
 L = 3
-batch_size = 128
+batch_size =128
 
 
 
@@ -114,17 +114,15 @@ with graph.as_default():
 
 
     saver = tf.train.Saver()
-#init = tf.global_variables_initializer()
+init = tf.global_variables_initializer()
 
-new_saver = tf.train.import_meta_graph('model.ckpt.meta')
+#new_saver = tf.train.import_meta_graph('model.ckpt.meta')
 with tf.Session(graph=graph) as sess:
 
-
-
     print("Running Session")
-    #sess.run(tf.global_variables_initializer())
+    sess.run(tf.global_variables_initializer())
     print("Session initialized")
-    new_saver.restore(sess, tf.train.latest_checkpoint('./'))
+    #new_saver.restore(sess, tf.train.latest_checkpoint('./'))
     for epoch in range(train_epoch):
         for step in range(num_train/batch_size):
             x_train, y_train = mnist.train.next_batch(batch_size)
@@ -140,4 +138,5 @@ with tf.Session(graph=graph) as sess:
             x_test,y_test = mnist.test.next_batch(batch_size)
             pred, acc,loss= sess.run([predictions,accuracy,cross_entropy],feed_dict={image_batch:x_test,label_batch:y_test})
             acc_total+=acc
-            print("Epoch:",epoch," Step:",step," acc_test: ",acc_total/(step+1)," loss:",loss)
+            if step%10==0:
+                print("Epoch:",epoch," Step:",step," acc_test: ",acc_total/(step+1)," loss:",loss)
