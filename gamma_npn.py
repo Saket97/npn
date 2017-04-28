@@ -35,8 +35,8 @@ with graph.as_default():
         #initial = tf.random_uniform(shape, -1.0,1.0)
         #return tf.Variable(initial)
 
-    image_batch = tf.placeholder(tf.float32,[None,784])
-    label_batch = tf.placeholder(tf.float32,[None,10])
+    image_batch = tf.placeholder(tf.float32,[batch_size,784])
+    label_batch = tf.placeholder(tf.float32,[batch_size,10])
 
     # output of each neuron
     o_m = ["dummy"]
@@ -109,20 +109,27 @@ with graph.as_default():
     cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels = label_batch,logits= predictions))
     #cross_entropy = (tf.reduce_mean(predictions-label_batch))
     optimizer = tf.train.AdamOptimizer().minimize(cross_entropy)
-    saver = tf.train.Saver()()()
-
+    saver = tf.train.Saver()
 
 #init = tf.global_variables_initializer()
+#new_saver = tf.train.import_meta_graph('model-gamma.ckpt.meta')
 with tf.Session(graph=graph) as sess:
     print "Running Session"
     sess.run(tf.global_variables_initializer())
     print "Session initialized"
+    #new_saver.restore(sess, tf.train.latest_checkpoint('./'))
     for epoch in range(train_epoch):
         for step in range(num_train/batch_size):
             x_train, y_train = mnist.train.next_batch(batch_size)
             pred, acc,loss,_= sess.run([predictions,accuracy,cross_entropy,optimizer],feed_dict={image_batch:x_train,label_batch:y_train})
             if step%10 == 0:
                 print("Epoch:",epoch," Step:",step," acc: ",acc," loss:",loss)
-        acc = sess.run(accuracy,feed_dict={image_batch:mnist.test.images,label_batch:mnist.test.labels})
-        print("Test Accuracy: ",acc)
-        saver.save(sess,'gamma-npn',global_step = epoch)
+        print("Saving Model")
+        save_path = saver.save(sess, "model-gamma.ckpt")
+        print("Model saved in file: %s" % save_path)
+        accuracy_total =0
+        for step in range(10000/batch_size):
+            x_test,y_test = mnist.test.next_batch(batch_size)
+            pred, acc,loss= sess.run([predictions,accuracy,cross_entropy],feed_dict={image_batch:x_test,label_batch:y_test})
+            acc_total+=acc
+            print("Epoch:",epoch," Step:",step," acc_test: ",acc_total/(step+1)," loss:",loss)
